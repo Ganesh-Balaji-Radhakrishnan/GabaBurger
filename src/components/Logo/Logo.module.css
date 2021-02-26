@@ -1,0 +1,11 @@
+.LogoBox {
+  background-color: white;
+  height: 70%;
+  padding: 8px;
+  border-radius: 10px;
+  box-sizing: border-box;
+}
+
+.LogoBox img {
+  height: 100%;
+}
