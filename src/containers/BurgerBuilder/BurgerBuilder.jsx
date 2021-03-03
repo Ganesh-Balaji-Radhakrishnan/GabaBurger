@@ -5,7 +5,7 @@ import BuildControls from "../../components/Burger/BuildControls/BuildControls"
 import Modal from "../../components/UI/Modal/Modal"
 import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary"
 
-import Aux from "../../aux/aux"
+import Aux from "../../Hoc/aux/aux"
 
 const INGREDIENT_PRICE = {
     meat: 20,
