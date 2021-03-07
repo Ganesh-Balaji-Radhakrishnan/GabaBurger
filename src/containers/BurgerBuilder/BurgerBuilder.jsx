@@ -4,6 +4,7 @@ import Burger from "../../components/Burger/Burger"
 import BuildControls from "../../components/Burger/BuildControls/BuildControls"
 import Modal from "../../components/UI/Modal/Modal"
 import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary"
+import Loader from "../../components/UI/Loader/Loader"
 
 import axios from "../../axios-orders"
 
@@ -27,7 +28,8 @@ class BurgerBuilder extends Component{
         },
         totalPrice : 20,
         isCheckOutPossible: false,
-        isModalPopUp: false
+        isModalPopUp: false,
+        loading: false
     }
 
     toCheckout = (ingredientsToCheck) => {
@@ -96,7 +98,8 @@ class BurgerBuilder extends Component{
     }
 
     orderSuccess = () => {
-        //alert('Your order is successful')
+        //alert('Your order is successful')'
+        this.setState({loading:true})
         const order = {
             ingredients : this.state.ingredient,
             totalPrice: this.state.totalPrice,
@@ -104,12 +107,14 @@ class BurgerBuilder extends Component{
             address: {
                 city: "stockholm",
                 street: "halsovägen"
-            }
+            },
+
+            deliveryMethod: "faster"
         }
 
         axios.post('/orders.json', order)
-            .then(res=>console.log(res))
-            .catch(err=>console.log(err))
+            .then(res=>this.setState({loading:false, isModalPopUp: false}))
+            .catch(err=>this.setState({loading:false, isModalPopUp:false}))
     }
 
     render(){
@@ -127,10 +132,16 @@ class BurgerBuilder extends Component{
 
         //console.log(disabledOptions)
 
+        let orderSummaryUpdate = <OrderSummary totalPrice={this.state.totalPrice} ingredients={this.state.ingredient} orderSuccess={this.orderSuccess} orderCancel={this.backdropCloser}/>
+
+        if(this.state.loading){
+            orderSummaryUpdate = <Loader />
+        }
+
         return(
             <Aux>
                 <Modal popUpState={this.state.isModalPopUp} backdropCloser={this.backdropCloser}>
-                    <OrderSummary totalPrice={this.state.totalPrice} ingredients={this.state.ingredient} orderSuccess={this.orderSuccess} orderCancel={this.backdropCloser}/>
+                    {orderSummaryUpdate}
                 </Modal>
                 <Burger ingredients={this.state.ingredient}/>
                 <BuildControls 
