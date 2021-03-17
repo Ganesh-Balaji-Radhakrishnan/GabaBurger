@@ -21,16 +21,21 @@ const INGREDIENT_PRICE = {
 class BurgerBuilder extends Component{
 
     state =  {
-        ingredient : {
-            meat: 0,
-            bacon: 0,
-            cheese: 0,
-            salad: 0,
-        },
+        ingredient : null,
         totalPrice : 20,
         isCheckOutPossible: false,
         isModalPopUp: false,
-        loading: false
+        loading: false,
+        error: false
+    }
+
+    componentDidMount(){
+        axios.get('https://gababurgers-default-rtdb.europe-west1.firebasedatabase.app/Ingredients%20.json')
+             .then(response => {
+                 this.setState({
+                     ingredient : response.data
+                 })
+             }).catch(err=>{this.setState({error:true})})
     }
 
     toCheckout = (ingredientsToCheck) => {
@@ -133,7 +138,24 @@ class BurgerBuilder extends Component{
 
         //console.log(disabledOptions)
 
-        let orderSummaryUpdate = <OrderSummary totalPrice={this.state.totalPrice} ingredients={this.state.ingredient} orderSuccess={this.orderSuccess} orderCancel={this.backdropCloser}/>
+        let burger = this.state.error ? <p>Can't load ingredient</p> : <Loader />
+        let orderSummaryUpdate = null
+        if(this.state.ingredient){
+            burger = (
+                <>
+                    <Burger ingredients={this.state.ingredient}/>
+                    <BuildControls 
+                        addIngredients={this.addIngredients} 
+                        removeIngredients={this.removeIngredients}
+                        disabledOptions={disabledOptions}
+                        price={this.state.totalPrice}
+                        isPurchaseable={this.state.isCheckOutPossible}
+                        modalPopUp={this.modalPopUp}
+                    />
+                </>
+            )
+            orderSummaryUpdate = <OrderSummary totalPrice={this.state.totalPrice} ingredients={this.state.ingredient} orderSuccess={this.orderSuccess} orderCancel={this.backdropCloser}/>
+        }
 
         if(this.state.loading){
             orderSummaryUpdate = <Loader />
@@ -144,18 +166,10 @@ class BurgerBuilder extends Component{
                 <Modal popUpState={this.state.isModalPopUp} backdropCloser={this.backdropCloser}>
                     {orderSummaryUpdate}
                 </Modal>
-                <Burger ingredients={this.state.ingredient}/>
-                <BuildControls 
-                    addIngredients={this.addIngredients} 
-                    removeIngredients={this.removeIngredients}
-                    disabledOptions={disabledOptions}
-                    price={this.state.totalPrice}
-                    isPurchaseable={this.state.isCheckOutPossible}
-                    modalPopUp={this.modalPopUp}
-                />
+                {burger}
             </Aux>
         )
     }
 }
 
-export default withErrorHandler(BurgerBuilder)
+export default withErrorHandler(BurgerBuilder, axios)
